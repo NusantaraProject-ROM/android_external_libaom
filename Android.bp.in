@@ -1,0 +1,47 @@
+cc_library_static {
+    name: "libaom",
+    vendor_available: true,
+    cflags: [
+        "-O3",
+    ],
+
+    export_include_dirs: [
+        "libaom",
+    ],
+
+    local_include_dirs: [
+        "libaom/third_party/libwebm/",
+    ],
+
+    arch: {
+        arm64: {
+            local_include_dirs: [
+                "config/arm64/",
+            ],
+            srcs: libaom_arm64_c_srcs,
+        },
+
+        arm: {
+            local_include_dirs: [
+                "config/arm/",
+            ],
+            srcs: libaom_arm_c_srcs,
+        },
+
+        x86_64: {
+            local_include_dirs: [
+                "config/x86_64/",
+            ],
+            srcs: libaom_x86_c_srcs,
+        },
+
+        x86: {
+            local_include_dirs: [
+                "config/x86/",
+            ],
+            srcs: libaom_x86_64_c_srcs,
+        },
+
+    },
+
+}
