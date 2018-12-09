@@ -1,0 +1,16 @@
+Name: libaom
+URL: https://aomedia.googlesource.com
+Version: v1.0.0
+License: BSD
+License File: libaom/LICENSE
+
+See README.updating to learn how to pull in upstream updates
+Note that we should NOT be modifying the ./libaom subdirectory as it will
+be overwritten with the next execution of this script.
+
+Below this line is automatically generated. Do not test your luck.
+========
+Date: Thursday November 29 2018
+Branch: origin/master
+Commit: 250bc3a61c501344523eec07fec35f304767260b
+
