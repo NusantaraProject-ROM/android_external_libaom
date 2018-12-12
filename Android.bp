@@ -432,12 +432,13 @@ cc_library_static {
             srcs: libaom_arm64_c_srcs,
         },
 
-        arm: {
+        // configured to require the neon unit
+        arm: { neon: {
             local_include_dirs: [
                 "config/arm/",
             ],
             srcs: libaom_arm_c_srcs,
-        },
+        }, },
 
         x86_64: {
             local_include_dirs: [
