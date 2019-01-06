@@ -11,3 +11,11 @@
 #include "aom/aom_codec.h"
 static const char* const cfg = "cmake ../../libaom -G \"Unix Makefiles\" -DCMAKE_TOOLCHAIN_FILE=\"../../libaom/build/cmake/toolchains/x86-linux.cmake\" -DCONFIG_AV1_ENCODER=0 -DCONFIG_LIBYUV=0 -DCONFIG_LOWBITDEPTH=0 -DENABLE_SSE3=0 -DENABLE_SSSE3=0 -DENABLE_SSE4_1=0 -DENABLE_SSE4_2=0 -DENABLE_AVX=0 -DENABLE_AVX2=0";
 const char *aom_codec_build_config(void) {return cfg;}
+
+
+// manually defined here as a NOP until we fix the scripts that auto-generate
+// makefiles so that we get the right assembly files included
+
+void aom_reset_mmx_state(void) {
+    return;
+}
