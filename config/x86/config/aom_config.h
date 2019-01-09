@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Alliance for Open Media. All rights reserved
+ * Copyright (c) 2019, Alliance for Open Media. All rights reserved
  *
  * This source code is subject to the terms of the BSD 2 Clause License and
  * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
@@ -40,26 +40,26 @@
 #define CONFIG_INSPECTION 0
 #define CONFIG_INTERNAL_STATS 0
 #define CONFIG_INTER_STATS_ONLY 0
-#define CONFIG_LIBYUV 0
-#define CONFIG_LOWBITDEPTH 0
-#define CONFIG_MAX_DECODE_PROFILE 2
+#define CONFIG_LIBYUV 1
+#define CONFIG_LOWBITDEPTH 1
+#define CONFIG_MAX_DECODE_PROFILE 0
 #define CONFIG_MISMATCH_DEBUG 0
 #define CONFIG_MULTITHREAD 1
-#define CONFIG_NORMAL_TILE_MODE 0
+#define CONFIG_NORMAL_TILE_MODE 1
 #define CONFIG_ONE_PASS_SVM 0
 #define CONFIG_OS_SUPPORT 1
 #define CONFIG_PIC 0
 #define CONFIG_RD_DEBUG 0
 #define CONFIG_REDUCED_ENCODER_BORDER 0
-#define CONFIG_RUNTIME_CPU_DETECT 1
+#define CONFIG_RUNTIME_CPU_DETECT 0
 #define CONFIG_SHARED 0
 #define CONFIG_SHARP_SETTINGS 0
-#define CONFIG_SIZE_LIMIT 0
+#define CONFIG_SIZE_LIMIT 1
 #define CONFIG_SPATIAL_RESAMPLING 1
 #define CONFIG_STATIC 1
 #define CONFIG_WEBM_IO 1
-#define DECODE_HEIGHT_LIMIT 0
-#define DECODE_WIDTH_LIMIT 0
+#define DECODE_HEIGHT_LIMIT 16384
+#define DECODE_WIDTH_LIMIT 16384
 #define HAVE_AVX 0
 #define HAVE_AVX2 0
 #define HAVE_DSPR2 0
@@ -72,10 +72,10 @@
 #define HAVE_PTHREAD_H 1
 #define HAVE_SSE 1
 #define HAVE_SSE2 1
-#define HAVE_SSE3 0
+#define HAVE_SSE3 1
 #define HAVE_SSE4_1 0
 #define HAVE_SSE4_2 0
-#define HAVE_SSSE3 0
+#define HAVE_SSSE3 1
 #define HAVE_UNISTD_H 1
 #define HAVE_VSX 0
 #define HAVE_WXWIDGETS 0
