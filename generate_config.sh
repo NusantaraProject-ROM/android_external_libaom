@@ -126,8 +126,7 @@ all_platforms+=" -DCONFIG_RUNTIME_CPU_DETECT=0"
 toolchain="-DCMAKE_TOOLCHAIN_FILE=${SRC}/build/cmake/toolchains"
 
 reset_dirs x86
-# Temporarily disable all x86 optimizations due to a build error with PIC
-gen_config_files x86 "${toolchain}/x86-linux.cmake ${all_platforms} -DENABLE_SSE2=0"
+gen_config_files x86 "${toolchain}/x86-linux.cmake ${all_platforms} -DCONFIG_PIC=1"
 
 # libaom_srcs.gni and aom_version.h are shared.
 cp libaom_srcs.gni "${BASE}"

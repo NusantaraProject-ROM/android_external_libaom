@@ -478,15 +478,13 @@ cc_library_static {
                 aom_scale_sources +
                 aom_sources +
                 aom_util_sources +
-                aom_ports_asm_x86,
-
-            // Re-enable these targets when the PIC build is fixed
-            //aom_dsp_common_asm_sse2 +
-            //aom_dsp_common_asm_ssse3 +
-            //aom_av1_common_intrin_sse2 +
-            //aom_dsp_common_intrin_sse2 +
-            //aom_av1_common_intrin_ssse3 +
-            //aom_dsp_common_intrin_ssse3,
+                aom_dsp_common_asm_sse2 +
+                aom_dsp_common_asm_ssse3 +
+                aom_ports_asm_x86 +
+                aom_av1_common_intrin_sse2 +
+                aom_dsp_common_intrin_sse2 +
+                aom_av1_common_intrin_ssse3 +
+                aom_dsp_common_intrin_ssse3,
         },
 
     },
