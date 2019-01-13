@@ -1,126 +1,172 @@
-#!/bin/bash -e
+#!/bin/bash
 #
-#Copyright (C) 2018 The Android Open Source Project
-#
-#Licensed under the Apache License, Version 2.0 (the "License");
-#you may not use this file except in compliance with the License.
-#You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-#Unless required by applicable law or agreed to in writing, software
-#distributed under the License is distributed on an "AS IS" BASIS,
-#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#See the License for the specific language governing permissions and
-#limitations under the License.
+# Copyright (c) 2018 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
-
-# This script is used to generate files in the <platform> directories needed to
-# build libaom. Every time libaom source code is updated run this script.
+# This script has been modified for use in Android. It is used to generate .bp
+# files and files in the config/ directories needed to build libaom.
 #
+# Every time the upstream source code is updated this script must be run.
+#
+# Usage:
 # $ ./generate_config.sh
-#
-# And this will update all the config files needed.
+# Requirements:
+# Install the following Debian packages.
+# - cmake3
+# - yasm or nasm
+# Toolchain for armv7:
+# - gcc-arm-linux-gnueabihf
+# - g++-arm-linux-gnueabihf
+# Toolchain for arm64:
+# - gcc-aarch64-linux-gnu
+# - g++-aarch64-linux-gnu
+# 32bit build environment for cmake. Including but potentially not limited to:
+# - lib32gcc-7-dev
+# - lib32stdc++-7-dev
+# Alternatively: treat 32bit builds like Windows and manually tweak aom_config.h
 
-BASE_DIR=$(pwd)
-LIBAOM_SRC_DIR="libaom"
-LIBAOM_CONFIG_DIR="config"
-TEMP_DIR="$LIBAOM_SRC_DIR.temp"
-ARCH_x86="x86"
-ARCH_x86_64="x86_64"
-ARCH_ARM="arm"
-ARCH_ARM_64="arm64"
+set -eE
 
-# Clean files from previous make.
-function make_clean {
-  make clean > /dev/null
-  rm -f libaom_srcs.txt
+# sort() consistently.
+export LC_ALL=C
+
+BASE=$(pwd)
+SRC="${BASE}/libaom"
+CFG="${BASE}/config"
+TMP=$(mktemp -d "${BASE}/build.XXXX")
+
+# Clean up and prepare config directory
+rm -rf "${CFG}"
+mkdir -p "${CFG}/config"
+
+function clean {
+  rm -rf "${TMP}"
 }
 
-# Extract a list of C sources from a libaom_srcs.txt file
-# $1 - path to libaom_srcs.txt
-function libaom_srcs_txt_to_c_srcs {
-    ##grep "CMakeFiles" $1 | grep -v "aom_config.c"| grep -v "gen_src" | grep -v "encoder" | grep -v "mkvmuxer" | grep -v "hdr_util" | sed 's/.*dir/"libaom/' | sed 's/.o$/",/' | sort
-    grep "CMakeFiles" $1 | grep -v "aom_config.c"| grep -v "gen_src" | grep -v "encoder" | grep -v "mkvmuxer" | grep -v "hdr_util" | sed 's/.*dir/        "libaom/' | sed 's/.o$/",/' | sort
+# Create empty temp and config directories.
+# $1 - Header file directory.
+function reset_dirs {
+  cd "${BASE}"
+  rm -rf "${TMP}"
+  mkdir "${TMP}"
+  cd "${TMP}"
+
+  echo "Generate ${1} config files."
+  mkdir -p "${CFG}/${1}/config"
 }
 
-# Convert a list of sources to a blueprint file containing a variable
-# assignment.
-# $1 - arch type
-function gen_bp_srcs {
-  (
-    varprefix=libaom_${1//-/_}
-    echo "${varprefix}_c_srcs = ["
-    libaom_srcs_txt_to_c_srcs libaom_srcs_$1.txt
-    echo "\"$LIBAOM_CONFIG_DIR/$1/$LIBAOM_CONFIG_DIR/aom_config.c\","
-    echo "]"
-    echo
-  ) > $BASE_DIR/$TEMP_DIR/config_$1.bp
-}
-
-
-# Generate and copy config folder to $BASE_DIR/$LIBAOM_CONFIG_DIR/$1/$LIBAOM_CONFIG_DIR
-# $1 - arch type
-function libaom_gen_config {
-    mkdir $LIBAOM_CONFIG_DIR/$1
-    mkdir $TEMP_DIR/$1/
-    cd $TEMP_DIR/$1/
-
-    if [ $1 == $ARCH_x86_64 ]; then
-        cmake $BASE_DIR/$LIBAOM_SRC_DIR -DCONFIG_AV1_ENCODER=0 -DCONFIG_LOWBITDEPTH=0 -DCONFIG_LIBYUV=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SH="CMAKE_SH-NOTFOUND" -G "Unix Makefiles" -DENABLE_AVX=0 -DENABLE_AVX2=0 -DENABLE_SSE4_1=0 -DENABLE_SSE4_2=0 -DENABLE_SSSE3=0 -DENABLE_SSE3=0 > /dev/null
-        make aom aom_common_app_util aom_decoder_app_util > libaom_srcs_$1.txt
-
-    elif [ $1 == $ARCH_x86 ]; then
-        cmake $BASE_DIR/$LIBAOM_SRC_DIR -DCONFIG_AV1_ENCODER=0 -DCONFIG_LOWBITDEPTH=0 -DCONFIG_LIBYUV=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SH="CMAKE_SH-NOTFOUND" -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=$BASE_DIR/$LIBAOM_SRC_DIR/build/cmake/toolchains/x86-linux.cmake -DENABLE_AVX=0 -DENABLE_AVX2=0 -DENABLE_SSE4_1=0 -DENABLE_SSE4_2=0 -DENABLE_SSSE3=0 -DENABLE_SSE3=0
-        make aom aom_common_app_util aom_decoder_app_util > libaom_srcs_$1.txt
-
-    elif [ $1 == $ARCH_ARM ]; then
-        cmake $BASE_DIR/$LIBAOM_SRC_DIR -DCONFIG_AV1_ENCODER=0 -DCONFIG_LOWBITDEPTH=0 -DCONFIG_LIBYUV=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SH="CMAKE_SH-NOTFOUND" -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=$BASE_DIR/$LIBAOM_SRC_DIR/build/cmake/toolchains/armv7-linux-gcc.cmake -DCROSS=arm-linux-gnueabihf-
-        make aom aom_common_app_util aom_decoder_app_util webm > libaom_srcs_$1.txt
-
-    elif [ $1 == $ARCH_ARM_64 ]; then
-        cmake $BASE_DIR/$LIBAOM_SRC_DIR -DCONFIG_AV1_ENCODER=0 -DCONFIG_LOWBITDEPTH=0 -DCONFIG_LIBYUV=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_SH="CMAKE_SH-NOTFOUND" -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=$BASE_DIR/$LIBAOM_SRC_DIR/build/cmake/toolchains/arm64-linux-gcc.cmake -DCROSS=aarch64-linux-gnu-
-        make aom aom_common_app_util aom_decoder_app_util webm > libaom_srcs_$1.txt
-
-    else
-        echo "Architecture not supported."
-    fi
-
-    gen_bp_srcs $1
-
-    rm $LIBAOM_CONFIG_DIR/*.cmake
-    cp -R $LIBAOM_CONFIG_DIR $BASE_DIR/$LIBAOM_CONFIG_DIR/$1
-    cd $BASE_DIR
-}
-
-# Remove the temporary directory in case it already exists and create a new temporary diretory.
-if [ -d "$TEMP_DIR" ]; then
-  rm -rf $TEMP_DIR
+if [ $# -ne 0 ]; then
+  echo "Unknown option(s): ${@}"
+  exit 1
 fi
 
-mkdir $TEMP_DIR
+# Missing function:
+# find_duplicates
+# We may have enough targets to avoid re-implementing this.
 
-# Remove the config folder in case it already exists and create a new config folder.
-if [ -d "$LIBAOM_CONFIG_DIR" ]; then
-  rm -rf $LIBAOM_CONFIG_DIR
-fi
+# Generate Config files.
+# $1 - Header file directory.
+# $2 - cmake options.
+function gen_config_files {
+  cmake "${SRC}" ${2} &> cmake.txt
 
-mkdir $LIBAOM_CONFIG_DIR
+  case "${1}" in
+    x86*)
+      egrep "#define [A-Z0-9_]+ [01]" config/aom_config.h | \
+        awk '{print "%define " $2 " " $3}' > config/aom_config.asm
+      ;;
+  esac
 
-libaom_gen_config $ARCH_ARM_64
-libaom_gen_config $ARCH_ARM
-libaom_gen_config $ARCH_x86_64
-libaom_gen_config $ARCH_x86
+  cp config/aom_config.{h,c,asm} "${CFG}/${1}/config/"
 
-cd $BASE_DIR/$TEMP_DIR/
+  cp config/*_rtcd.h "${CFG}/${1}/config/"
+  #clang-format -i "${CFG}/${1}/config/"*_rtcd.h
+}
+
+function update_readme {
+  local IFS=$'\n'
+  # Split git log output '<date>\n<commit hash>' on the newline to produce 2
+  # array entries.
+  local vals=($(git -C "${SRC}" --no-pager log -1 --format="%cd%n%H" \
+    --date=format:"%A %B %d %Y"))
+  sed -E -i.bak \
+    -e "s/^(Date:)[[:space:]]+.*$/\1 ${vals[0]}/" \
+    -e "s/^(Commit:)[[:space:]]+[a-f0-9]{40}/\1 ${vals[1]}/" \
+    ${BASE}/README.android
+  rm ${BASE}/README.android.bak
+  cat <<EOF
+
+README.android updated with:
+Date: ${vals[0]}
+Commit: ${vals[1]}
+EOF
+}
+
+cd "${TMP}"
+
+# Scope 'trap' error reporting to configuration generation.
+(
+trap '{
+  [ -f ${TMP}/cmake.txt ] && cat ${TMP}/cmake.txt
+  echo "Build directory ${TMP} not removed automatically."
+}' ERR
+
+all_platforms="-DCONFIG_SIZE_LIMIT=1"
+all_platforms+=" -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384"
+all_platforms+=" -DCONFIG_AV1_ENCODER=0"
+all_platforms+=" -DCONFIG_LOWBITDEPTH=1"
+all_platforms+=" -DCONFIG_MAX_DECODE_PROFILE=0"
+all_platforms+=" -DCONFIG_NORMAL_TILE_MODE=1"
+# Android requires ssse3. Simplify the build by disabling everything above that
+# and RTCD.
+all_platforms+=" -DENABLE_SSE4_1=0"
+all_platforms+=" -DCONFIG_RUNTIME_CPU_DETECT=0"
+
+toolchain="-DCMAKE_TOOLCHAIN_FILE=${SRC}/build/cmake/toolchains"
+
+reset_dirs x86
+# Temporarily disable all x86 optimizations due to a build error with PIC
+gen_config_files x86 "${toolchain}/x86-linux.cmake ${all_platforms} -DENABLE_SSE2=0"
+
+# libaom_srcs.gni and aom_version.h are shared.
+cp libaom_srcs.gni "${BASE}"
+cp config/aom_version.h "${CFG}/config/"
+
+reset_dirs x86_64
+gen_config_files x86_64 "${all_platforms}"
+
+reset_dirs arm
+gen_config_files arm "${toolchain}/armv7-linux-gcc.cmake ${all_platforms}"
+
+reset_dirs arm64
+gen_config_files arm64 "${toolchain}/arm64-linux-gcc.cmake ${all_platforms}"
+)
+
+# This needs to be run by update_libaom.sh before the .git file is removed.
+#update_readme
+
+# libaom_srcs.gni was built for Chromium. Remove:
+# - the path prefix (//third_party/libaom/source/)
+# - comments (lines starting with #)
+# - header files
+# - perl scripts (rtcd)
+
+rm -f "${BASE}/Android.bp"
 (
   echo "// THIS FILE IS AUTOGENERATED, DO NOT EDIT"
   echo "// Generated from Android.bp.in, run ./generate_config.sh to regenerate"
   echo
-  cat config_*.bp
-  cat $BASE_DIR/Android.bp.in
-) > $BASE_DIR/Android.bp
+  cat "${BASE}/libaom_srcs.gni" |
+    grep -v ^\# |
+    sed 's/\/\/third_party\/libaom\/source\///' |
+    grep -v h\",$ |
+    grep -v pl\",$
+  cat "${BASE}/Android.bp.in"
+) > "${BASE}/Android.bp"
 
-cd $BASE_DIR
-rm -r $BASE_DIR/$TEMP_DIR/
+rm -f "${BASE}/libaom_srcs.gni"
+bpfmt -w "${BASE}/Android.bp" || echo "bpfmt not found: format Android.bp manually."
 
+
+clean

@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 # This tool is used to update libaom source code to a revision of the upstream
-# repository.
+# repository. Modified from Chromium src/third_party/libvpx/update_libvpx.sh
 
 # Usage:
 #
@@ -18,6 +18,11 @@
 # 2. git
 
 export LC_ALL=C
+
+die() {
+  echo "@"
+  exit 1
+}
 
 # Location for the remote git repository.
 GIT_REPO="https://aomedia.googlesource.com/aom"
@@ -43,9 +48,8 @@ prev_hash="$(egrep "^Commit: [[:alnum:]]" README.android | awk '{ print $2 }')"
 echo "prev_hash:$prev_hash"
 
 rm -rf $LIBAOM_SRC_DIR
-# be robust in the face of errors (meaning don't overwrite the wrong place)
-mkdir $LIBAOM_SRC_DIR || exit 1
-cd $LIBAOM_SRC_DIR || exit 1
+mkdir $LIBAOM_SRC_DIR || die "Unable to create ${LIBAOM_SRC_DIR}"
+cd $LIBAOM_SRC_DIR || die "Unable to enter ${LIBAOM_SRC_DIR}"
 
 # Start a local git repo.
 git clone $GIT_REPO .
@@ -62,78 +66,59 @@ tr -s [:blank:] ' ' | cut -f6 -d\ )"
 hash=$(git log -1 --format="%H")
 
 # README reminder.
-(
-    # keep meta info / header
-    sed -n '0,/^====/p' < ../README.android
-
-    # sed kept it in there
-    #echo "========"
-
-    echo "Date: $(date +"%A %B %d %Y")"
-    echo "Branch: $GIT_BRANCH"
-    echo "Commit: $hash"
-    echo ""
-) > ../update.$$-README.android
-cat ../update.$$-README.android
-mv ../update.$$-README.android ../README.android
+echo "Update README.android:"
+echo "==============="
+echo "Date: $(date +"%A %B %d %Y")"
+echo "Branch: $GIT_BRANCH"
+echo "Commit: $hash"
+echo "==============="
+echo ""
 
 # Commit message header.
-COMMIT_MSG=../commit-message-`date +"%Y%m%d.%H%M%S"`
-(
-    echo "libaom: Pull from upstream"
-    echo ""
+echo "Commit message:"
+echo "==============="
+echo "libaom: Pull from upstream"
+echo ""
 
-    # Output the current commit hash.
-    echo "Prev HEAD: $prev_hash"
-    echo "New  HEAD: $hash"
-    echo ""
+# Output the current commit hash.
+echo "Current HEAD: $hash"
+echo ""
 
-    # Output log for upstream from current hash.
-    if [ -n "$prev_hash" ]; then
-      echo "git log from upstream:"
-      pretty_git_log="$(git log \
+# Output log for upstream from current hash.
+if [ -n "$prev_hash" ]; then
+  echo "git log from upstream:"
+  pretty_git_log="$(git log \
                     --no-merges \
                     --topo-order \
                     --pretty="%h %s" \
                     --max-count=20 \
                     $prev_hash..$hash)"
-      if [ -z "$pretty_git_log" ]; then
-        echo "No log found. Checking for reverts."
-        pretty_git_log="$(git log \
+  if [ -z "$pretty_git_log" ]; then
+    echo "No log found. Checking for reverts."
+    pretty_git_log="$(git log \
                       --no-merges \
                       --topo-order \
                       --pretty="%h %s" \
                       --max-count=20 \
                       $hash..$prev_hash)"
-      fi
-      echo "$pretty_git_log"
-      # If it makes it to 20 then it's probably skipping even more.
-      if [ `echo "$pretty_git_log" | wc -l` -eq 20 ]; then
-        echo "<...>"
-      fi
-    else
-      # no previous hash
-      echo "git log from upstream:"
-      pretty_git_log="$(git log \
-                    --no-merges \
-                    --topo-order \
-                    --pretty="%h %s" \
-                    --max-count=20)"
-      if [ -z "$pretty_git_log" ]; then
-        echo "No log found. Checking for reverts."
-      fi
-      echo "$pretty_git_log"
-      # If it makes it to 20 then it's probably skipping even more.
-      if [ `echo "$pretty_git_log" | wc -l` -eq 20 ]; then
-        echo "<...>"
-      fi
-    fi
-) > ${COMMIT_MSG}
+  fi
+  echo "$pretty_git_log"
+  # If it makes it to 20 then it's probably skipping even more.
+  if [ `echo "$pretty_git_log" | wc -l` -eq 20 ]; then
+    echo "<...>"
+  fi
+else
+  # no previous hash
+  echo "git log from upstream:"
+  pretty_git_log="$(git log \
+                --no-merges \
+                --topo-order \
+                --pretty="%h %s" \
+                --max-count=20 \
+                $hash)"
+fi
 
-# Tell user about it
-echo "Commit message: (stored in ./${COMMIT_MSG})"
-echo "==============="
-cat ${COMMIT_MSG}
+# Commit message footer.
 echo ""
 echo "==============="
 
@@ -148,7 +133,3 @@ echo "$delete" | xargs -I {} git rm --ignore-unmatch {}
 find . -type d -empty -exec git rm {} \;
 
 chmod 755 build/cmake/*.sh build/cmake/*.pl
-
-# not even sure why we're doing a chdir here as the last thing in the script
-# it isn't going to make any difference semantically.
-cd $BASE_DIR || exit 1

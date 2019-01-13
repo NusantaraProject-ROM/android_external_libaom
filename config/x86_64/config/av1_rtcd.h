@@ -63,7 +63,8 @@ void av1_build_compound_diffwtd_mask_d16_c(uint8_t *mask, DIFFWTD_MASK_TYPE mask
 #define av1_build_compound_diffwtd_mask_d16 av1_build_compound_diffwtd_mask_d16_c
 
 void av1_build_compound_diffwtd_mask_highbd_c(uint8_t *mask, DIFFWTD_MASK_TYPE mask_type, const uint8_t *src0, int src0_stride, const uint8_t *src1, int src1_stride, int h, int w, int bd);
-#define av1_build_compound_diffwtd_mask_highbd av1_build_compound_diffwtd_mask_highbd_c
+void av1_build_compound_diffwtd_mask_highbd_ssse3(uint8_t *mask, DIFFWTD_MASK_TYPE mask_type, const uint8_t *src0, int src0_stride, const uint8_t *src1, int src1_stride, int h, int w, int bd);
+#define av1_build_compound_diffwtd_mask_highbd av1_build_compound_diffwtd_mask_highbd_ssse3
 
 void av1_convolve_2d_copy_sr_c(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
 void av1_convolve_2d_copy_sr_sse2(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
@@ -125,7 +126,8 @@ void av1_highbd_convolve_2d_scale_c(const uint16_t *src, int src_stride, uint16_
 #define av1_highbd_convolve_2d_scale av1_highbd_convolve_2d_scale_c
 
 void av1_highbd_convolve_2d_sr_c(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
-#define av1_highbd_convolve_2d_sr av1_highbd_convolve_2d_sr_c
+void av1_highbd_convolve_2d_sr_ssse3(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
+#define av1_highbd_convolve_2d_sr av1_highbd_convolve_2d_sr_ssse3
 
 void av1_highbd_convolve_avg_c(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps);
 #define av1_highbd_convolve_avg av1_highbd_convolve_avg_c
@@ -137,10 +139,12 @@ void av1_highbd_convolve_horiz_rs_c(const uint16_t *src, int src_stride, uint16_
 #define av1_highbd_convolve_horiz_rs av1_highbd_convolve_horiz_rs_c
 
 void av1_highbd_convolve_x_sr_c(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
-#define av1_highbd_convolve_x_sr av1_highbd_convolve_x_sr_c
+void av1_highbd_convolve_x_sr_ssse3(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
+#define av1_highbd_convolve_x_sr av1_highbd_convolve_x_sr_ssse3
 
 void av1_highbd_convolve_y_sr_c(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
-#define av1_highbd_convolve_y_sr av1_highbd_convolve_y_sr_c
+void av1_highbd_convolve_y_sr_ssse3(const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params, int bd);
+#define av1_highbd_convolve_y_sr av1_highbd_convolve_y_sr_ssse3
 
 void av1_highbd_dr_prediction_z1_c(uint16_t *dst, ptrdiff_t stride, int bw, int bh, const uint16_t *above, const uint16_t *left, int upsample_above, int dx, int dy, int bd);
 #define av1_highbd_dr_prediction_z1 av1_highbd_dr_prediction_z1_c
@@ -218,7 +222,8 @@ void av1_highbd_warp_affine_c(const int32_t *mat, const uint16_t *ref, int width
 #define av1_highbd_warp_affine av1_highbd_warp_affine_c
 
 void av1_highbd_wiener_convolve_add_src_c(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, const ConvolveParams *conv_params, int bps);
-#define av1_highbd_wiener_convolve_add_src av1_highbd_wiener_convolve_add_src_c
+void av1_highbd_wiener_convolve_add_src_ssse3(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, const ConvolveParams *conv_params, int bps);
+#define av1_highbd_wiener_convolve_add_src av1_highbd_wiener_convolve_add_src_ssse3
 
 void av1_inv_txfm2d_add_16x16_c(const int32_t *input, uint16_t *output, int stride, TX_TYPE tx_type, int bd);
 #define av1_inv_txfm2d_add_16x16 av1_inv_txfm2d_add_16x16_c
@@ -278,11 +283,13 @@ void av1_inv_txfm2d_add_8x8_c(const int32_t *input, uint16_t *output, int stride
 #define av1_inv_txfm2d_add_8x8 av1_inv_txfm2d_add_8x8_c
 
 void av1_inv_txfm_add_c(const tran_low_t *dqcoeff, uint8_t *dst, int stride, const TxfmParam *txfm_param);
-#define av1_inv_txfm_add av1_inv_txfm_add_c
+void av1_inv_txfm_add_ssse3(const tran_low_t *dqcoeff, uint8_t *dst, int stride, const TxfmParam *txfm_param);
+#define av1_inv_txfm_add av1_inv_txfm_add_ssse3
 
 void av1_jnt_convolve_2d_c(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
 void av1_jnt_convolve_2d_sse2(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
-#define av1_jnt_convolve_2d av1_jnt_convolve_2d_sse2
+void av1_jnt_convolve_2d_ssse3(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
+#define av1_jnt_convolve_2d av1_jnt_convolve_2d_ssse3
 
 void av1_jnt_convolve_2d_copy_c(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
 void av1_jnt_convolve_2d_copy_sse2(const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams *filter_params_x, const InterpFilterParams *filter_params_y, const int subpel_x_q4, const int subpel_y_q4, ConvolveParams *conv_params);
@@ -316,43 +323,55 @@ void av1_wiener_convolve_add_src_sse2(const uint8_t *src, ptrdiff_t src_stride, 
 
 void cdef_filter_block_c(uint8_t *dst8, uint16_t *dst16, int dstride, const uint16_t *in, int pri_strength, int sec_strength, int dir, int pri_damping, int sec_damping, int bsize, int coeff_shift);
 void cdef_filter_block_sse2(uint8_t *dst8, uint16_t *dst16, int dstride, const uint16_t *in, int pri_strength, int sec_strength, int dir, int pri_damping, int sec_damping, int bsize, int coeff_shift);
-#define cdef_filter_block cdef_filter_block_sse2
+void cdef_filter_block_ssse3(uint8_t *dst8, uint16_t *dst16, int dstride, const uint16_t *in, int pri_strength, int sec_strength, int dir, int pri_damping, int sec_damping, int bsize, int coeff_shift);
+#define cdef_filter_block cdef_filter_block_ssse3
 
 int cdef_find_dir_c(const uint16_t *img, int stride, int32_t *var, int coeff_shift);
 int cdef_find_dir_sse2(const uint16_t *img, int stride, int32_t *var, int coeff_shift);
-#define cdef_find_dir cdef_find_dir_sse2
+int cdef_find_dir_ssse3(const uint16_t *img, int stride, int32_t *var, int coeff_shift);
+#define cdef_find_dir cdef_find_dir_ssse3
 
 cfl_subsample_hbd_fn cfl_get_luma_subsampling_420_hbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_420_hbd cfl_get_luma_subsampling_420_hbd_c
+cfl_subsample_hbd_fn cfl_get_luma_subsampling_420_hbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_420_hbd cfl_get_luma_subsampling_420_hbd_ssse3
 
 cfl_subsample_lbd_fn cfl_get_luma_subsampling_420_lbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_420_lbd cfl_get_luma_subsampling_420_lbd_c
+cfl_subsample_lbd_fn cfl_get_luma_subsampling_420_lbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_420_lbd cfl_get_luma_subsampling_420_lbd_ssse3
 
 cfl_subsample_hbd_fn cfl_get_luma_subsampling_422_hbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_422_hbd cfl_get_luma_subsampling_422_hbd_c
+cfl_subsample_hbd_fn cfl_get_luma_subsampling_422_hbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_422_hbd cfl_get_luma_subsampling_422_hbd_ssse3
 
 cfl_subsample_lbd_fn cfl_get_luma_subsampling_422_lbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_422_lbd cfl_get_luma_subsampling_422_lbd_c
+cfl_subsample_lbd_fn cfl_get_luma_subsampling_422_lbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_422_lbd cfl_get_luma_subsampling_422_lbd_ssse3
 
 cfl_subsample_hbd_fn cfl_get_luma_subsampling_444_hbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_444_hbd cfl_get_luma_subsampling_444_hbd_c
+cfl_subsample_hbd_fn cfl_get_luma_subsampling_444_hbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_444_hbd cfl_get_luma_subsampling_444_hbd_ssse3
 
 cfl_subsample_lbd_fn cfl_get_luma_subsampling_444_lbd_c(TX_SIZE tx_size);
-#define cfl_get_luma_subsampling_444_lbd cfl_get_luma_subsampling_444_lbd_c
+cfl_subsample_lbd_fn cfl_get_luma_subsampling_444_lbd_ssse3(TX_SIZE tx_size);
+#define cfl_get_luma_subsampling_444_lbd cfl_get_luma_subsampling_444_lbd_ssse3
 
 void copy_rect8_16bit_to_16bit_c(uint16_t *dst, int dstride, const uint16_t *src, int sstride, int v, int h);
 void copy_rect8_16bit_to_16bit_sse2(uint16_t *dst, int dstride, const uint16_t *src, int sstride, int v, int h);
-#define copy_rect8_16bit_to_16bit copy_rect8_16bit_to_16bit_sse2
+void copy_rect8_16bit_to_16bit_ssse3(uint16_t *dst, int dstride, const uint16_t *src, int sstride, int v, int h);
+#define copy_rect8_16bit_to_16bit copy_rect8_16bit_to_16bit_ssse3
 
 void copy_rect8_8bit_to_16bit_c(uint16_t *dst, int dstride, const uint8_t *src, int sstride, int v, int h);
 void copy_rect8_8bit_to_16bit_sse2(uint16_t *dst, int dstride, const uint8_t *src, int sstride, int v, int h);
-#define copy_rect8_8bit_to_16bit copy_rect8_8bit_to_16bit_sse2
+void copy_rect8_8bit_to_16bit_ssse3(uint16_t *dst, int dstride, const uint8_t *src, int sstride, int v, int h);
+#define copy_rect8_8bit_to_16bit copy_rect8_8bit_to_16bit_ssse3
 
 cfl_predict_hbd_fn get_predict_hbd_fn_c(TX_SIZE tx_size);
-#define get_predict_hbd_fn get_predict_hbd_fn_c
+cfl_predict_hbd_fn get_predict_hbd_fn_ssse3(TX_SIZE tx_size);
+#define get_predict_hbd_fn get_predict_hbd_fn_ssse3
 
 cfl_predict_lbd_fn get_predict_lbd_fn_c(TX_SIZE tx_size);
-#define get_predict_lbd_fn get_predict_lbd_fn_c
+cfl_predict_lbd_fn get_predict_lbd_fn_ssse3(TX_SIZE tx_size);
+#define get_predict_lbd_fn get_predict_lbd_fn_ssse3
 
 cfl_subtract_average_fn get_subtract_average_fn_c(TX_SIZE tx_size);
 cfl_subtract_average_fn get_subtract_average_fn_sse2(TX_SIZE tx_size);
