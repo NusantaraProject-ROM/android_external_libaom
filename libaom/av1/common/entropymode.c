@@ -488,17 +488,17 @@ static const aom_cdf_prob
       { AOM_CDF2(16384) }
     };
 
-static const aom_cdf_prob
-    default_compound_type_cdf[BLOCK_SIZES_ALL][CDF_SIZE(COMPOUND_TYPES - 1)] = {
-      { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
-      { AOM_CDF2(23431) }, { AOM_CDF2(13171) }, { AOM_CDF2(11470) },
-      { AOM_CDF2(9770) },  { AOM_CDF2(9100) },  { AOM_CDF2(8233) },
-      { AOM_CDF2(6172) },  { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
-      { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
-      { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
-      { AOM_CDF2(11820) }, { AOM_CDF2(7701) },  { AOM_CDF2(16384) },
-      { AOM_CDF2(16384) }
-    };
+static const aom_cdf_prob default_compound_type_cdf[BLOCK_SIZES_ALL][CDF_SIZE(
+    MASKED_COMPOUND_TYPES)] = {
+  { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
+  { AOM_CDF2(23431) }, { AOM_CDF2(13171) }, { AOM_CDF2(11470) },
+  { AOM_CDF2(9770) },  { AOM_CDF2(9100) },  { AOM_CDF2(8233) },
+  { AOM_CDF2(6172) },  { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
+  { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
+  { AOM_CDF2(16384) }, { AOM_CDF2(16384) }, { AOM_CDF2(16384) },
+  { AOM_CDF2(11820) }, { AOM_CDF2(7701) },  { AOM_CDF2(16384) },
+  { AOM_CDF2(16384) }
+};
 
 static const aom_cdf_prob default_wedge_idx_cdf[BLOCK_SIZES_ALL][CDF_SIZE(16)] =
     { { AOM_CDF16(2048, 4096, 6144, 8192, 10240, 12288, 14336, 16384, 18432,
@@ -1072,9 +1072,9 @@ void av1_setup_frame_contexts(AV1_COMMON *cm) {
   // TODO(jack.haughton@argondesign.com): don't think this should be necessary,
   // but could do with fuller testing
   if (cm->large_scale_tile) {
-    for (int i = 0; i < INTER_REFS_PER_FRAME; ++i) {
-      if (cm->current_frame.frame_refs[i].buf != NULL)
-        cm->current_frame.frame_refs[i].buf->frame_context = *cm->fc;
+    for (int i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
+      RefCntBuffer *const buf = get_ref_frame_buf(cm, i);
+      if (buf != NULL) buf->frame_context = *cm->fc;
     }
     for (int i = 0; i < FRAME_BUFFERS; ++i)
       cm->buffer_pool->frame_bufs[i].frame_context = *cm->fc;
@@ -1086,10 +1086,8 @@ void av1_setup_past_independence(AV1_COMMON *cm) {
   // Features disabled, 0, with delta coding (Default state).
   av1_clearall_segfeatures(&cm->seg);
 
-  cm->current_frame_seg_map = cm->cur_frame->seg_map;
-
-  if (cm->current_frame_seg_map)
-    memset(cm->current_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
+  if (cm->cur_frame->seg_map)
+    memset(cm->cur_frame->seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   // reset mode ref deltas
   av1_set_default_ref_deltas(cm->cur_frame->ref_deltas);
@@ -1099,7 +1097,6 @@ void av1_setup_past_independence(AV1_COMMON *cm) {
   av1_default_coef_probs(cm);
   init_mode_probs(cm->fc);
   av1_init_mv_probs(cm);
-  av1_init_lv_map(cm);
   cm->fc->initialized = 1;
   av1_setup_frame_contexts(cm);
 

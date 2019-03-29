@@ -48,20 +48,24 @@ static INLINE int av1_get_spatial_seg_pred(const AV1_COMMON *const cm,
   int prev_l = -1;   // left segment_id
   int prev_u = -1;   // top segment_id
   if ((xd->up_available) && (xd->left_available)) {
-    prev_ul = get_segment_id(cm, cm->current_frame_seg_map, BLOCK_4X4,
-                             mi_row - 1, mi_col - 1);
+    prev_ul = get_segment_id(cm, cm->cur_frame->seg_map, BLOCK_4X4, mi_row - 1,
+                             mi_col - 1);
   }
   if (xd->up_available) {
-    prev_u = get_segment_id(cm, cm->current_frame_seg_map, BLOCK_4X4,
-                            mi_row - 1, mi_col - 0);
+    prev_u = get_segment_id(cm, cm->cur_frame->seg_map, BLOCK_4X4, mi_row - 1,
+                            mi_col - 0);
   }
   if (xd->left_available) {
-    prev_l = get_segment_id(cm, cm->current_frame_seg_map, BLOCK_4X4,
-                            mi_row - 0, mi_col - 1);
+    prev_l = get_segment_id(cm, cm->cur_frame->seg_map, BLOCK_4X4, mi_row - 0,
+                            mi_col - 1);
   }
+  // This property follows from the fact that get_segment_id() returns a
+  // nonnegative value. This allows us to test for all edge cases with a simple
+  // prev_ul < 0 check.
+  assert(IMPLIES(prev_ul >= 0, prev_u >= 0 && prev_l >= 0));
 
   // Pick CDF index based on number of matching/out-of-bounds segment IDs.
-  if (prev_ul < 0 || prev_u < 0 || prev_l < 0) /* Edge case */
+  if (prev_ul < 0) /* Edge cases */
     *cdf_index = 0;
   else if ((prev_ul == prev_u) && (prev_ul == prev_l))
     *cdf_index = 2;
@@ -90,10 +94,8 @@ static INLINE int av1_get_pred_context_seg_id(const MACROBLOCKD *xd) {
 static INLINE int get_comp_index_context(const AV1_COMMON *cm,
                                          const MACROBLOCKD *xd) {
   MB_MODE_INFO *mbmi = xd->mi[0];
-  const RefCntBuffer *const bck_buf =
-      cm->current_frame.frame_refs[mbmi->ref_frame[0] - LAST_FRAME].buf;
-  const RefCntBuffer *const fwd_buf =
-      cm->current_frame.frame_refs[mbmi->ref_frame[1] - LAST_FRAME].buf;
+  const RefCntBuffer *const bck_buf = get_ref_frame_buf(cm, mbmi->ref_frame[0]);
+  const RefCntBuffer *const fwd_buf = get_ref_frame_buf(cm, mbmi->ref_frame[1]);
   int bck_frame_index = 0, fwd_frame_index = 0;
   int cur_frame_index = cm->cur_frame->order_hint;
 
