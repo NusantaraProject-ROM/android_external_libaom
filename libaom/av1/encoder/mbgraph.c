@@ -71,8 +71,8 @@ static unsigned int do_16x16_motion_iteration(AV1_COMP *cpi, const MV *ref_mv,
   xd->mi[0]->mv[0] = x->best_mv;
   xd->mi[0]->ref_frame[1] = NONE_FRAME;
 
-  av1_build_inter_predictors_sby(&cpi->common, xd, mb_row, mb_col, NULL,
-                                 BLOCK_16X16);
+  av1_enc_build_inter_predictor(&cpi->common, xd, mb_row, mb_col, NULL,
+                                BLOCK_16X16, AOM_PLANE_Y, AOM_PLANE_Y);
 
   /* restore UMV window */
   x->mv_limits = tmp_mv_limits;
@@ -364,7 +364,7 @@ static void separate_arf_mbs(AV1_COMP *cpi) {
 void av1_update_mbgraph_stats(AV1_COMP *cpi) {
   AV1_COMMON *const cm = &cpi->common;
   int i, n_frames = av1_lookahead_depth(cpi->lookahead);
-  YV12_BUFFER_CONFIG *golden_ref = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+  YV12_BUFFER_CONFIG *golden_ref = &get_ref_frame_buf(cm, GOLDEN_FRAME)->buf;
 
   assert(golden_ref != NULL);
 
