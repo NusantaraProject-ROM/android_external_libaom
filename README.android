@@ -4,9 +4,9 @@ Version: v1.0.0
 License: BSD
 License File: libaom/LICENSE
 
-Date: Thursday November 29 2018
+Date: Friday March 29 2019
 Branch: origin/master
-Commit: 250bc3a61c501344523eec07fec35f304767260b
+Commit: 978ab9e6cd19904cdd54b69a4c30b10c747eb55a
 
 Description:
 Contains the sources used to compile libaom.
